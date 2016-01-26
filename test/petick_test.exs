@@ -1,8 +1,8 @@
 defmodule PetickTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest Petick
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "start_child/1" do
+    assert {:ok, _pid} = Petick.start_child([[]])
   end
 end
