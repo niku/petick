@@ -9,11 +9,12 @@ defmodule Petick do
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Petick.Worker, [arg1, arg2, arg3]),
+      worker(Petick.Worker, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Petick.Supervisor]
+    opts = [strategy: :simple_one_for_one, name: Petick.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end
