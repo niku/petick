@@ -2,7 +2,7 @@ defmodule Petick.TimerTest do
   use ExUnit.Case, async: true
   @moduletag timeout: 3_000 # 3.0 sec
 
-  @interval 100 # 0.1sec
+  @interval 10 # 0.01sec
   @delta 1.5 # 150%
   @wait_for_timeout @interval * 3
 
