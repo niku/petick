@@ -22,7 +22,8 @@ defmodule Petick do
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Petick.Worker, [arg1, arg2, arg3]),
-      supervisor(@supervisor, [])
+      supervisor(@supervisor, []),
+      supervisor(Task.Supervisor, [[name: Petick.TaskSupervisor]]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
