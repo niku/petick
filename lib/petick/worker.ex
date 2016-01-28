@@ -5,6 +5,10 @@ defmodule Petick.Worker do
     GenServer.start_link(__MODULE__, args, options)
   end
 
+  def stop(server) do
+    GenServer.stop(server)
+  end
+
   def init([callback: callback, interval: interval]) do
     config = %Petick.Config{callback: callback, interval: interval}
     timer_ref = Process.send_after(self, :tick, interval)

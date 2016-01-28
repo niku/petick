@@ -20,4 +20,14 @@ defmodule Petick.WorkerTest do
     assert delta1 < 1.1
     assert delta2 < 1.1
   end
+
+  test "stop callback" do
+    {:ok, manager} = GenEvent.start_link
+    callback = fn _pid -> GenEvent.notify(manager, :os.system_time(:milli_seconds)) end
+    {:ok, worker} = Petick.Worker.start_link([callback: callback, interval: @interval])
+    Enum.take(GenEvent.stream(manager), 1) # wait callback at least once
+    :ok = Petick.Worker.stop(worker) # stop callback
+    # no callback called, so the stream is timeout
+    assert {:timeout, _} = catch_exit(Enum.to_list(GenEvent.stream(manager, timeout: @interval * 3)))
+  end
 end
