@@ -1,4 +1,4 @@
-defmodule Petick.Worker do
+defmodule Petick.Timer do
   use GenServer
 
   def start_link(args, options \\ []) do
