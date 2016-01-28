@@ -36,6 +36,22 @@ defmodule Petick.TimerTest do
     assert delta2 < 1.1
   end
 
+  @tag capture_log: true
+  test "periodic callback even if raise error in a callback" do
+    {:ok, manager} = GenEvent.start_link
+    callback = fn _pid ->
+      GenEvent.notify(manager, :os.system_time(:milli_seconds))
+      raise "boom!"
+    end
+    {:ok, _timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
+    [first, second, third] = Enum.take(GenEvent.stream(manager), 3)
+    delta1 = abs((second - first) / @interval)
+    delta2 = abs((third - second) / @interval)
+     # less than 10%
+    assert delta1 < 1.1
+    assert delta2 < 1.1
+  end
+
   test "stop callback" do
     {:ok, manager} = GenEvent.start_link
     callback = fn _pid -> GenEvent.notify(manager, :os.system_time(:milli_seconds)) end
