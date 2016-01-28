@@ -14,4 +14,10 @@ defmodule Petick.Worker do
   def handle_call(:get, _from, state) do
     {:reply, state, state}
   end
+
+  def handle_info(:tick, {state, _old_timer_ref}) do
+    state.callback.(self)
+    timer_ref = Process.send_after(self, :tick, state.interval)
+    {:noreply, {state, timer_ref}}
+  end
 end
