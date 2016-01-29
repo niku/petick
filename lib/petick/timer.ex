@@ -16,7 +16,9 @@ defmodule Petick.Timer do
   end
 
   def handle_call(:get, _from, state) do
-    {:reply, state, state}
+    {config, timer_ref} = state
+    next_tick = Process.read_timer(timer_ref)
+    {:reply, {config, next_tick}, state}
   end
 
   def handle_info(:tick, {state, _old_timer_ref}) do

@@ -6,10 +6,11 @@ defmodule Petick.TimerTest do
   @delta 1.5 # 150%
   @wait_for_timeout @interval * 3
 
-  test "gets config" do
+  test "gets config and next tick" do
     callback = fn x -> x end
     {:ok, timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
-    assert {%Petick.Config{callback: ^callback, interval: @interval}, _next_tick} = GenServer.call(timer, :get)
+    assert {%Petick.Config{callback: ^callback, interval: @interval}, next_tick} = GenServer.call(timer, :get)
+    assert is_integer(next_tick) and next_tick <= @interval
   end
 
   test "periodick callback" do
