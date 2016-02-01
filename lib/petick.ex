@@ -10,6 +10,14 @@ defmodule Petick do
     Supervisor.start_child(@supervisor, args)
   end
 
+  def list do
+    Supervisor.which_children(@supervisor)
+    |> Enum.map(fn {:undefined, pid, :worker, [Petick.Timer]} ->
+      {config, next_tick} = Petick.Timer.get_config(pid)
+      {pid, config, next_tick}
+    end)
+  end
+
   #
   # Server
   #
