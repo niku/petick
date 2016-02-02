@@ -26,7 +26,10 @@ defmodule Petick.Timer do
   end
 
   def handle_info(:tick, {state, _old_timer_ref}) do
-    Task.Supervisor.start_child(Petick.TaskSupervisor, fn -> state.callback.(self) end)
+    case state.callback do
+      {m, f} -> Task.Supervisor.start_child(Petick.TaskSupervisor, m, f, [self])
+      f when is_function(f) -> Task.Supervisor.start_child(Petick.TaskSupervisor, fn -> f.(self) end)
+    end
     timer_ref = Process.send_after(self, :tick, state.interval)
     {:noreply, {state, timer_ref}}
   end
