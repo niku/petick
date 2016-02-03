@@ -6,8 +6,8 @@ defmodule Petick do
   #
   # Client
   #
-  def start_child(args) do
-    Supervisor.start_child(@supervisor, args)
+  def start(args) do
+    Supervisor.start_child(@supervisor, [args])
   end
 
   def list do

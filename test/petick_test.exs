@@ -10,11 +10,11 @@ defmodule PetickTest do
   test "lists timers and each timer are represented by tuple that has three elements." do
     callback1 = fn x -> IO.inspect x end
     interval1 = 3000
-    {:ok, pid1} = Petick.start_child([[callback: callback1, interval: interval1]])
+    {:ok, pid1} = Petick.start(callback: callback1, interval: interval1)
 
     callback2 = fn _x -> IO.inspect :os.timestamp end
     interval2 = 5000
-    {:ok, _pid2} = Petick.start_child([[callback: callback2, interval: interval2]])
+    {:ok, _pid2} = Petick.start(callback: callback2, interval: interval2)
 
     list = [{pid, config, next_tick}|_rest] = Petick.list
 
@@ -28,11 +28,11 @@ defmodule PetickTest do
   test "terminates timer." do
     callback1 = fn x -> IO.inspect x end
     interval1 = 3000
-    {:ok, pid1} = Petick.start_child([[callback: callback1, interval: interval1]])
+    {:ok, pid1} = Petick.start(callback: callback1, interval: interval1)
 
     callback2 = fn _x -> IO.inspect :os.timestamp end
     interval2 = 5000
-    {:ok, pid2} = Petick.start_child([[callback: callback2, interval: interval2]])
+    {:ok, pid2} = Petick.start(callback: callback2, interval: interval2)
 
     Petick.terminate(pid1)
 
