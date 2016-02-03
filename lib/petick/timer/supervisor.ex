@@ -7,7 +7,7 @@ defmodule Petick.Timer.Supervisor do
 
   def init(_args) do
     children = [
-      worker(Petick.Timer, [])
+      worker(Petick.Timer, [], restart: :temporary)
     ]
     opts = [strategy: :simple_one_for_one]
     supervise(children, opts)

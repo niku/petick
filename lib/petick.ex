@@ -17,6 +17,10 @@ defmodule Petick do
     end
   end
 
+  def terminate(pid) do
+    Supervisor.terminate_child(@supervisor, pid)
+  end
+
   #
   # Server
   #

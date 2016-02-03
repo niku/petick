@@ -23,4 +23,23 @@ defmodule PetickTest do
     assert config == %Petick.Config{callback: callback1, interval: interval1}
     assert_in_delta next_tick, interval1, 100
   end
+
+  @tag capture_log: true
+  test "terminates timer." do
+    callback1 = fn x -> IO.inspect x end
+    interval1 = 3000
+    {:ok, pid1} = Petick.start_child([[callback: callback1, interval: interval1]])
+
+    callback2 = fn _x -> IO.inspect :os.timestamp end
+    interval2 = 5000
+    {:ok, pid2} = Petick.start_child([[callback: callback2, interval: interval2]])
+
+    Petick.terminate(pid1)
+
+    list = [{pid, config, next_tick}|_rest] = Petick.list
+    assert length(list) == 1
+    assert pid == pid2
+    assert config == %Petick.Config{callback: callback2, interval: interval2}
+    assert_in_delta next_tick, interval2, 100
+  end
 end
