@@ -11,10 +11,11 @@ defmodule Petick do
   end
 
   def list do
-    for {:undefined, pid, :worker, [Petick.Timer]} <- Supervisor.which_children(@supervisor) do
-      {config, next_tick} = Petick.Timer.get_config(pid)
-      {pid, config, next_tick}
-    end
+    for {:undefined, pid, :worker, [Petick.Timer]} <- Supervisor.which_children(@supervisor), do: pid
+  end
+
+  def get(pid) do
+    Petick.Timer.get_config(pid)
   end
 
   def change_interval(pid, interval) when is_integer(interval) and 0 < interval do
