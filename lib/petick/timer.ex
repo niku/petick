@@ -31,16 +31,18 @@ defmodule Petick.Timer do
 
   def handle_cast({:change_interval, interval}, state) do
     {config, timer_ref} = state
-    Process.cancel_timer(timer_ref)
+    # Suppress warning by Dializer
+    _ = Process.cancel_timer(timer_ref)
     timer_ref = Process.send_after(self, :tick, interval)
     {:noreply, {%{config | interval: interval}, timer_ref}}
   end
 
   def handle_info(:tick, {state, _old_timer_ref}) do
-    case state.callback do
-      {m, f} -> Task.Supervisor.start_child(Petick.TaskSupervisor, m, f, [self])
-      f when is_function(f) -> Task.Supervisor.start_child(Petick.TaskSupervisor, fn -> f.(self) end)
-    end
+    # Suppress warning by Dializer
+    _ = case state.callback do
+          {m, f} -> Task.Supervisor.start_child(Petick.TaskSupervisor, m, f, [self])
+          f when is_function(f) -> Task.Supervisor.start_child(Petick.TaskSupervisor, fn -> f.(self) end)
+        end
     timer_ref = Process.send_after(self, :tick, state.interval)
     {:noreply, {state, timer_ref}}
   end
