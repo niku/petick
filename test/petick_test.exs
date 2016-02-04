@@ -17,8 +17,8 @@ defmodule PetickTest do
     interval2 = 5000
     {:ok, _pid2} = Petick.start(callback: callback2, interval: interval2)
 
-    list = [{pid, config, next_tick}|_rest] = Petick.list
-
+    list = Petick.list
+    {pid, config, next_tick} = Enum.find(list, fn {p, _c, _n} -> p == pid1 end)
     assert length(list) == 2
     assert pid == pid1
     assert config == %Petick.Config{callback: callback1, interval: interval1}
