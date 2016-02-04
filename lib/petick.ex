@@ -17,6 +17,10 @@ defmodule Petick do
     end
   end
 
+  def change_interval(pid, interval) when is_integer(interval) and 0 < interval do
+    Petick.Timer.change_interval(pid, interval)
+  end
+
   def terminate(pid) do
     Supervisor.terminate_child(@supervisor, pid)
   end

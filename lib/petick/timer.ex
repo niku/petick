@@ -13,6 +13,10 @@ defmodule Petick.Timer do
     GenServer.call(server, :get)
   end
 
+  def change_interval(server, interval) when is_integer(interval) and 0 < interval do
+    GenServer.cast(server, {:change_interval, interval})
+  end
+
   def init([callback: callback, interval: interval]) do
     config = %Petick.Config{callback: callback, interval: interval}
     timer_ref = Process.send_after(self, :tick, interval)
@@ -23,6 +27,13 @@ defmodule Petick.Timer do
     {config, timer_ref} = state
     next_tick = Process.read_timer(timer_ref)
     {:reply, {config, next_tick}, state}
+  end
+
+  def handle_cast({:change_interval, interval}, state) do
+    {config, timer_ref} = state
+    Process.cancel_timer(timer_ref)
+    timer_ref = Process.send_after(self, :tick, interval)
+    {:noreply, {%{config | interval: interval}, timer_ref}}
   end
 
   def handle_info(:tick, {state, _old_timer_ref}) do

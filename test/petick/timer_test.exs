@@ -100,4 +100,74 @@ defmodule Petick.TimerTest do
     # no callback called, so the stream is timeout
     assert {:timeout, _} = catch_exit(Enum.to_list(GenEvent.stream(manager, timeout: @wait_for_timeout)))
   end
+
+  test "change interval from frequently to infrequently" do
+    old_interval = @interval
+    new_interval = @interval * 3
+
+    {:ok, manager} = GenEvent.start_link
+    callback = fn _pid -> GenEvent.notify(manager, :os.system_time(:milli_seconds)) end
+    {:ok, timer} = Petick.Timer.start_link([callback: callback, interval: old_interval])
+
+    result = GenEvent.stream(manager)
+             |> Enum.reduce_while([], fn i, acc ->
+               # interval:   | new | changed | old |
+               # list    :  [a,    b,        c,    d]
+               list = Enum.take([i | acc], 4)
+               changed = with b when is_integer(b) <- Enum.at(list, 1),
+                              c when is_integer(c) <- Enum.at(list, 2), do: !(div((b - c) * 100, old_interval) in @delta_ratio)
+
+               if length(list) == 2 do # called twice
+                 Petick.Timer.change_interval(timer, new_interval)
+               end
+
+               if changed do
+                 {:halt, list}
+               else
+                 {:cont, list}
+               end
+             end)
+             |> Enum.chunk(2, 1)
+             |> Enum.map(fn [a, b] -> a - b end)
+
+    [new_delta, changed_delta, old_delta] = result
+    assert div(new_delta     * 100, new_interval) in @delta_ratio
+    assert div(changed_delta * 100, new_interval) in @delta_ratio
+    assert div(old_delta     * 100, old_interval) in @delta_ratio
+  end
+
+  test "change interval from infrequently to frequently" do
+    old_interval = @interval * 3
+    new_interval = @interval
+
+    {:ok, manager} = GenEvent.start_link
+    callback = fn _pid -> GenEvent.notify(manager, :os.system_time(:milli_seconds)) end
+    {:ok, timer} = Petick.Timer.start_link([callback: callback, interval: old_interval])
+
+    result = GenEvent.stream(manager)
+             |> Enum.reduce_while([], fn i, acc ->
+               # interval:   | new | changed | old |
+               # list    :  [a,    b,        c,    d]
+               list = Enum.take([i | acc], 4)
+               changed = with b when is_integer(b) <- Enum.at(list, 1),
+                              c when is_integer(c) <- Enum.at(list, 2), do: !(div((b - c) * 100, old_interval) in @delta_ratio)
+
+               if length(list) == 2 do # called twice
+                 Petick.Timer.change_interval(timer, new_interval)
+               end
+
+               if changed do
+                 {:halt, list}
+               else
+                 {:cont, list}
+               end
+             end)
+             |> Enum.chunk(2, 1)
+             |> Enum.map(fn [a, b] -> a - b end)
+
+    [new_delta, changed_delta, old_delta] = result
+    assert div(new_delta     * 100, new_interval) in @delta_ratio
+    assert div(changed_delta * 100, new_interval) in @delta_ratio
+    assert div(old_delta     * 100, old_interval) in @delta_ratio
+  end
 end
