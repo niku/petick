@@ -3,47 +3,59 @@ defmodule Petick do
 
   @supervisor Petick.Timer.Supervisor
 
-  #
-  # Client
-  #
+  ## Client API
+
+  @doc """
+  Starts a timer.
+  """
+  @spec start([term]) :: {:ok, pid}
   def start(args) do
     Supervisor.start_child(@supervisor, [args])
   end
 
+  @doc """
+  Lists pids of timer.
+  """
+  @spec list() :: [pid]
   def list do
     for {:undefined, pid, :worker, [Petick.Timer]} <- Supervisor.which_children(@supervisor), do: pid
   end
 
+  @doc """
+  Gets config of the timer.
+  """
+  @spec get(pid) :: Petick.Timer.Config.t
   def get(pid) do
     Petick.Timer.get_config(pid)
   end
 
+  @doc """
+  Changes interval of the timer.
+  """
+  @spec change_interval(pid, pos_integer) :: :ok
   def change_interval(pid, interval) when is_integer(interval) and 0 < interval do
     Petick.Timer.change_interval(pid, interval)
   end
 
+  @doc """
+  Terminates the timer.
+  """
+  @spec terminate(pid) :: :ok | {:error, error} when error: :not_found
   def terminate(pid) do
     Supervisor.terminate_child(@supervisor, pid)
   end
 
-  #
-  # Server
-  #
+  ## Server API
 
-  # See http://elixir-lang.org/docs/stable/elixir/Application.html
-  # for more information on OTP Applications
+  @doc false
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     children = [
-      # Define workers and child supervisors to be supervised
-      # worker(Petick.Worker, [arg1, arg2, arg3]),
       supervisor(@supervisor, []),
       supervisor(Task.Supervisor, [[name: Petick.TaskSupervisor]]),
     ]
 
-    # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one]
     Supervisor.start_link(children, opts)
   end
