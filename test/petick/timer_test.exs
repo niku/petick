@@ -2,8 +2,8 @@ defmodule Petick.TimerTest do
   use ExUnit.Case, async: true
   @moduletag timeout: 3_000 # 3.0 sec
 
-  @interval 10 # 0.01sec
-  @delta 1.5 # 150%
+  @interval 30 # 0.03sec
+  @delta_ratio 70..130 # 70-130%
   @wait_for_timeout @interval * 3
 
   test "gets config and next tick" do
@@ -30,18 +30,18 @@ defmodule Petick.TimerTest do
     {:ok, manager} = GenEvent.start_link
     callback = fn _pid -> GenEvent.notify(manager, :os.system_time(:milli_seconds)) end
     {:ok, _timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
-    [first, second, third] = Enum.take(GenEvent.stream(manager), 3)
-    delta1 = abs((second - first) / @interval)
-    delta2 = abs((third - second) / @interval)
-    assert delta1 < @delta
-    assert delta2 < @delta
+    [delta1, delta2] = GenEvent.stream(manager)
+                       |> Stream.chunk(2, 1)
+                       |> Enum.take(2)
+                       |> Enum.map(fn [a, b] -> b - a end)
+    assert div(delta1 * 100, @interval) in @delta_ratio
+    assert div(delta2 * 100, @interval) in @delta_ratio
   end
 
   test "periodic callback when callback is {Module, function} style ", %{test: module_name} do
     defmodule MyGenEvent do
       def start_link, do: GenEvent.start_link(name: __MODULE__)
       def notify(v), do: GenEvent.notify(__MODULE__, v)
-      def stream, do: GenEvent.stream(__MODULE__)
     end
 
     defmodule module_name do
@@ -50,13 +50,14 @@ defmodule Petick.TimerTest do
       end
     end
 
-    {:ok, _manager} = MyGenEvent.start_link
+    {:ok, manager} = MyGenEvent.start_link
     {:ok, _timer} = Petick.Timer.start_link([callback: {module_name, :mycallback}, interval: @interval])
-    [first, second, third] = Enum.take(MyGenEvent.stream, 3)
-    delta1 = abs((second - first) / @interval)
-    delta2 = abs((third - second) / @interval)
-    assert delta1 < @delta
-    assert delta2 < @delta
+    [delta1, delta2] = GenEvent.stream(manager)
+                       |> Stream.chunk(2, 1)
+                       |> Enum.take(2)
+                       |> Enum.map(fn [a, b] -> b - a end)
+    assert div(delta1 * 100, @interval) in @delta_ratio
+    assert div(delta2 * 100, @interval) in @delta_ratio
   end
 
   test "periodic callback even if callback is slow" do
@@ -66,11 +67,12 @@ defmodule Petick.TimerTest do
       GenEvent.notify(manager, :os.system_time(:milli_seconds))
     end
     {:ok, _timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
-    [first, second, third] = Enum.take(GenEvent.stream(manager), 3)
-    delta1 = abs((second - first) / @interval)
-    delta2 = abs((third - second) / @interval)
-    assert delta1 < @delta
-    assert delta2 < @delta
+    [delta1, delta2] = GenEvent.stream(manager)
+                       |> Stream.chunk(2, 1)
+                       |> Enum.take(2)
+                       |> Enum.map(fn [a, b] -> b - a end)
+    assert div(delta1 * 100, @interval) in @delta_ratio
+    assert div(delta2 * 100, @interval) in @delta_ratio
   end
 
   @tag capture_log: true
@@ -81,11 +83,12 @@ defmodule Petick.TimerTest do
       raise "boom!"
     end
     {:ok, _timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
-    [first, second, third] = Enum.take(GenEvent.stream(manager), 3)
-    delta1 = abs((second - first) / @interval)
-    delta2 = abs((third - second) / @interval)
-    assert delta1 < @delta
-    assert delta2 < @delta
+    [delta1, delta2] = GenEvent.stream(manager)
+                       |> Stream.chunk(2, 1)
+                       |> Enum.take(2)
+                       |> Enum.map(fn [a, b] -> b - a end)
+    assert div(delta1 * 100, @interval) in @delta_ratio
+    assert div(delta2 * 100, @interval) in @delta_ratio
   end
 
   test "stop callback" do
