@@ -9,7 +9,7 @@ defmodule Petick.TimerTest do
   test "gets config and next tick" do
     callback = fn x -> x end
     {:ok, timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
-    assert {%Petick.Config{callback: ^callback, interval: @interval}, next_tick} = GenServer.call(timer, :get)
+    assert {%Petick.Timer.Config{callback: ^callback, interval: @interval}, next_tick} = GenServer.call(timer, :get)
     # When a timer is expired, false binds to the next_tick.
     assert (is_integer(next_tick) and next_tick <= @interval) or (next_tick == false)
   end
@@ -23,7 +23,7 @@ defmodule Petick.TimerTest do
 
     callback = {module_name, :mycallback}
     {:ok, timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
-    assert {%Petick.Config{callback: ^callback, interval: @interval}, _next_tick} = GenServer.call(timer, :get)
+    assert {%Petick.Timer.Config{callback: ^callback, interval: @interval}, _next_tick} = GenServer.call(timer, :get)
   end
 
   test "periodick callback" do

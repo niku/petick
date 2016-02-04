@@ -32,7 +32,7 @@ defmodule PetickTest do
     pid = Enum.find(Petick.list, &(&1 == pid1))
 
     {config, next_tick} = Petick.get(pid)
-    assert config == %Petick.Config{callback: callback1, interval: interval1}
+    assert config == %Petick.Timer.Config{callback: callback1, interval: interval1}
     assert_in_delta next_tick, interval1, 100
   end
 

@@ -18,7 +18,7 @@ defmodule Petick.Timer do
   end
 
   def init([callback: callback, interval: interval]) do
-    config = %Petick.Config{callback: callback, interval: interval}
+    config = %Petick.Timer.Config{callback: callback, interval: interval}
     timer_ref = Process.send_after(self, :tick, interval)
     {:ok, {config, timer_ref}}
   end
