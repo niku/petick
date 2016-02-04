@@ -11,7 +11,7 @@ defmodule PetickTest do
   test "lists timers" do
     callback1 = fn x -> IO.inspect x end
     interval1 = 3000
-    {:ok, pid1} = Petick.start(callback: callback1, interval: interval1)
+    {:ok, _pid1} = Petick.start(callback: callback1, interval: interval1)
 
     callback2 = fn _x -> IO.inspect :os.timestamp end
     interval2 = 5000
