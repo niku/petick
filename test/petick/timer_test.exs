@@ -6,6 +6,12 @@ defmodule Petick.TimerTest do
   @delta_ratio 70..130 # 70-130%
   @wait_for_timeout @interval * 3
 
+  test "whatever argument order" do
+    callback = fn x -> x end
+    assert {:ok, timer} = Petick.Timer.start_link([callback: callback, interval: @interval])
+    assert {:ok, timer} = Petick.Timer.start_link([interval: @interval, callback: callback])
+  end
+
   test "gets config and next tick" do
     callback = fn x -> x end
     {:ok, timer} = Petick.Timer.start_link([callback: callback, interval: @interval])

@@ -17,7 +17,9 @@ defmodule Petick.Timer do
     GenServer.cast(server, {:change_interval, interval})
   end
 
-  def init([callback: callback, interval: interval]) do
+  def init(args) do
+    callback = Keyword.get(args, :callback)
+    interval = Keyword.get(args, :interval)
     config = %Petick.Timer.Config{callback: callback, interval: interval}
     timer_ref = Process.send_after(self, :tick, interval)
     {:ok, {config, timer_ref}}
