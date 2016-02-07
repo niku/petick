@@ -32,6 +32,14 @@ defmodule Petick.TimerTest do
     assert {%Petick.Timer.Config{callback: ^callback, interval: @interval}, _next_tick} = GenServer.call(timer, :get)
   end
 
+  test "callback is given timer pid as argument" do
+    {:ok, manager} = GenEvent.start_link
+    callback = fn pid -> GenEvent.notify(manager, pid) end
+    {:ok, timer_pid} = Petick.Timer.start_link([callback: callback, interval: @interval])
+    [callback_pid] = Enum.take(GenEvent.stream(manager), 1)
+    assert timer_pid === callback_pid
+  end
+
   test "periodick callback" do
     {:ok, manager} = GenEvent.start_link
     callback = fn _pid -> GenEvent.notify(manager, :os.system_time(:milli_seconds)) end
