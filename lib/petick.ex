@@ -18,13 +18,14 @@ defmodule Petick do
   """
   @spec list() :: [pid]
   def list do
-    for {:undefined, pid, :worker, [Petick.Timer]} <- Supervisor.which_children(@supervisor), do: pid
+    for {:undefined, pid, :worker, [Petick.Timer]} <- Supervisor.which_children(@supervisor),
+        do: pid
   end
 
   @doc """
   Gets config of the timer.
   """
-  @spec get(pid) :: Petick.Timer.Config.t
+  @spec get(pid) :: Petick.Timer.Config.t()
   def get(pid) do
     Petick.Timer.get_config(pid)
   end
@@ -53,7 +54,7 @@ defmodule Petick do
 
     children = [
       supervisor(@supervisor, []),
-      supervisor(Task.Supervisor, [[name: Petick.TaskSupervisor]]),
+      supervisor(Task.Supervisor, [[name: Petick.TaskSupervisor]])
     ]
 
     opts = [strategy: :one_for_one]
