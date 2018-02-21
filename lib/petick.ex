@@ -1,6 +1,4 @@
 defmodule Petick do
-  use Application
-
   @supervisor Petick.Timer.Supervisor
 
   ## Client API
@@ -44,20 +42,5 @@ defmodule Petick do
   @spec terminate(pid) :: :ok | {:error, error} when error: :not_found
   def terminate(pid) do
     Supervisor.terminate_child(@supervisor, pid)
-  end
-
-  ## Server API
-
-  @doc false
-  def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
-    children = [
-      supervisor(@supervisor, []),
-      supervisor(Task.Supervisor, [[name: Petick.TaskSupervisor]])
-    ]
-
-    opts = [strategy: :one_for_one]
-    Supervisor.start_link(children, opts)
   end
 end
