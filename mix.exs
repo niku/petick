@@ -24,8 +24,7 @@ defmodule Petick.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:earmark, "~> 0.1", only: :dev},
-      {:ex_doc, "~> 0.11", only: :dev},
+      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:dialyxir, "~> 0.3", only: [:dev]}
     ]
   end
