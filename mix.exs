@@ -25,6 +25,7 @@ defmodule Petick.MixProject do
   defp deps do
     [
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
+      {:credo, "~> 0.9.1", only: :dev, runtime: false},
       {:dialyxir, "~> 0.3", only: [:dev]}
     ]
   end
