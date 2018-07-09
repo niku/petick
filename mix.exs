@@ -26,7 +26,7 @@ defmodule Petick.MixProject do
     [
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:credo, "~> 0.9.1", only: :dev, runtime: false},
-      {:dialyxir, "~> 0.3", only: [:dev]}
+      {:dialyxir, "~> 1.0.0-rc.3", only: :dev, runtime: false}
     ]
   end
 
