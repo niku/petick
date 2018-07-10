@@ -1,9 +1,39 @@
 language: elixir
-
 sudo: false
-
-elixir:
-  - 1.3.0
-
 otp_release:
-  - 19.0
+  - 21.0
+elixir:
+  - 1.6
+cache:
+  directories:
+    - _build
+    - deps
+before_install:
+  # https://docs.travis-ci.com/user/encrypting-files/
+  # Decrypt the file about configuration(auth and so on) of hex.pm
+  - mkdir -p ~/.hex/
+  # You need execution command `travis encrypt-file ~/.hex/hex.config` in the repository and adding generated line following like:
+  # - openssl aes-256-cbc -K $encrypted_36030c2fae51_key -iv $encrypted_36030c2fae51_iv -in hex.config.enc -out ~/.hex/hex.config -d
+script:
+  - MIX_ENV=test mix test
+  # You need to compile following the line at first in the development environment (MIX_ENV=dev)
+  - mix compile --warnings-as-errors
+  - mix format --check-formatted
+  - mix credo --strict
+  # https://github.com/jeremyjh/dialyxir#command-line-options
+  # > exit immediately with same exit status as dialyzer. useful for CI
+  - mix dialyzer --halt-exit-status
+deploy:
+  # https://docs.travis-ci.com/user/deployment/script/
+  # > `script` must be a scalar pointing to an executable file or command.
+  provider: script
+  # http://yaml.org/spec/1.2/spec.html#id2779048
+  # `>-` indicates the line folding.
+  # Comment out the following script part if you needed publshing to hex.pm
+  # script: >-
+  #   mix deps.get &&
+  #   echo $HEX_LOCAL_PASSWORD | mix hex.publish --no-confirm &&
+  #   mix clean &&
+  #   mix deps.clean --all
+  on:
+    tags: true
